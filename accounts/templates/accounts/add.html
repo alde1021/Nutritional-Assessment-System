@@ -1,0 +1,298 @@
+{% extends 'accounts/home.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Information</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .page-container {
+            padding: 30px;
+            background-color: #e9f4ff;
+        }
+
+        .form-card {
+            background-color: #d9d9d9;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            height: 100%;
+            
+        }
+        
+        .table-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        button#new {
+            padding: 10px 24px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        button#new:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="assessment_type" id="hidden_assessment_type">
+    <input type="hidden" name="school_year" id="hidden_school_year">
+    <input type="hidden" name="date_of_weighing" id="hidden_date_of_weighing">
+    
+    <div class="d-flex flex-wrap align-items-center justify-content-start px-4 py-2 bg-light border-bottom shadow-sm"
+    style="gap: 1.5rem; ">
+   
+   <div class="col-md-1">
+   <label for="assessment" class="form-label mb-0 fw-semibold small text-muted">Assessment Type</label>
+   <select name="assessment" id="assessment" class="form-control" disabled>
+   <option value="Baseline">Baseline</option>
+   <option value="Terminal" selected>Terminal</option>
+   </select>
+   </div>
+
+   <div class="col-md-1">
+   <label for="school_year" class="form-label">School Year</label>
+   <select name="school_year" id="school_year" class="form-select" disabled>
+    {% for year in school_years %}
+    <option value="{{ year }}">{{ year }}</option>
+    {% endfor %}
+   </select>
+   </div>
+
+   <div class="col-md-1">
+       <label for="date_weighing" class="form-label">Date of Weighing</label>
+       <input type="date" id="date_weighing" class="form-control" disabled>
+       
+   </div>
+    <!-- Edit Icon aligned with inputs -->
+  <div class="d-flex align-items-end" id="editContainer">
+    <button class="btn btn-sm btn-link" id="editBtn" onclick="enableInputs()">
+        <i class="fas fa-pen"></i>
+      </button>
+  </div>
+
+  <!-- Set Term and Cancel Buttons (initially hidden) -->
+  <div id="actionButtons" class="d-flex gap-2 mt-4" style="display: none;">
+    <button class="btn btn-success" onclick="setTerm()">Set Term</button>
+    <button class="btn btn-secondary btn-sm" onclick="cancelEdit()">Cancel</button>
+  </div>
+</div>
+
+<body>
+
+<div class="container-fluid page-container">
+    <div class="row g-4">
+        
+        <!-- 🧾 Student Form -->
+        <div class="col-md-4">
+            <div class="form-card">
+
+                <h3 class="text-center mb-2">ADD STUDENT</h3>
+                <h5>Grade Level: {{ request.user.grade_level }}</h5>
+                <h5>Section: {{ request.user.section }}</h5>
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                  Please fix the following errors before submitting:
+                  <ul class="mb-0">
+                    {% for field in form %}
+                      {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                      {% endfor %}
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+                    <div class="mb-2">
+                        <label>ID Number</label>
+                        <input type="text" name="id_no" class="form-control" required value="{{ form.id_no.value|default_if_none:'' }}">
+                        {% if form.id_no.errors %}
+                            <div class="text-danger small">{{ form.id_no.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Last Name</label>
+                        <input type="text" name="last" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label>First Name</label>
+                        <input type="text" name="first" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label>Middle Name</label>
+                        <input type="text" name="middle" class="form-control">
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label>Age</label>
+                        <input type="text" name="age" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label>Birthday</label>
+                        <input type="date" name="birthday" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label>Weight (kg)</label>
+                        <input type="number" name="weight" step="0.01" min="0" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label>Height (m)</label>
+                        <input type="number" name="height" step="0.01" min="0" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label>Gender</label>
+                        <select name="gender" class="form-select" required>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                        </select>
+                    </div>
+                    
+                <button type="submit" id="new">Submit</button>
+           
+            </div>
+        </div>
+   
+
+</form>
+        <!-- 📋 Student Table -->
+        <div class="col-md-8">
+            <div class="table-container">
+                <h3 class="text-center mb-3">Student List</h3>
+                <table class="table table-striped table-bordered">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>ID</th>
+                            <th>Last Name</th>
+                            <th>First Name</th>
+                            <th>Middle</th>
+                            <th>Age</th>
+                            <th>Birthday</th>
+                            <th>Weight</th>
+                            <th>Height</th>
+                            <th>Gender</th>
+                            <th>BMI</th>
+                            <th>Nutritional Status</th>
+                            <th>Height for Age</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for x in mem %}
+                        <tr>
+                            <td>{{ x.id_no }}</td>
+                            <td>{{ x.last }}</td>
+                            <td>{{ x.first }}</td>
+                            <td>{{ x.middle }}</td>
+                            <td>{{ x.age }}</td>
+                            <td>{{ x.birthday }}</td>
+                            <td>{{ x.weight }}</td>
+                            <td>{{ x.height }}</td>
+                            <td>{{ x.gender }}</td>
+                            <td>{{ x.bmi }}</td>
+                            <td>{{ x.nutritional_status }}</td>
+                            <td>{{ x.height_for_age }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center">No students found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+     // Store term values on "Set Term"
+  function setTerm() {
+    const assessment = document.getElementById("assessment").value;
+    const schoolYear = document.getElementById("school_year").value;
+    const dateWeighing = document.getElementById("date_weighing").value;
+
+    // Save to localStorage
+    localStorage.setItem("term_assessment", assessment);
+    localStorage.setItem("term_school_year", schoolYear);
+    localStorage.setItem("term_date_weighing", dateWeighing);
+
+    // Lock inputs again
+    document.getElementById("assessment").disabled = true;
+    document.getElementById("school_year").disabled = true;
+    document.getElementById("date_weighing").disabled = true;
+    document.getElementById("actionButtons").style.display = "none";
+    document.getElementById("editContainer").style.display = "inline-block";
+  }
+
+  // Load saved term values on page load
+  window.onload = function () {
+    const storedAssessment = localStorage.getItem("term_assessment") || "Terminal";
+    const storedSchoolYear = localStorage.getItem("term_school_year") || "2025–2026";
+    const storedDateWeighing = localStorage.getItem("term_date_weighing") || "";
+
+    document.getElementById("assessment").value = storedAssessment;
+    document.getElementById("school_year").value = storedSchoolYear;
+    document.getElementById("date_weighing").value = storedDateWeighing;
+  };
+
+  // When form is submitted, copy values into hidden fields
+  document.querySelector("form").addEventListener("submit", function () {
+    document.getElementById("hidden_assessment_type").value = localStorage.getItem("term_assessment");
+    document.getElementById("hidden_school_year").value = localStorage.getItem("term_school_year");
+    document.getElementById("hidden_date_of_weighing").value = localStorage.getItem("term_date_weighing");
+  });
+
+  function enableInputs() {
+    document.getElementById("assessment").disabled = false;
+    document.getElementById("school_year").disabled = false;
+    document.getElementById("date_weighing").disabled = false;
+    document.getElementById("actionButtons").style.display = "flex";
+    document.getElementById("editContainer").style.display = "none";
+  }
+
+  function cancelEdit() {
+    // Reset to saved values
+    document.getElementById("assessment").value = localStorage.getItem("term_assessment") || "Terminal";
+    document.getElementById("school_year").value = localStorage.getItem("term_school_year") || "2025–2026";
+    document.getElementById("date_weighing").value = localStorage.getItem("term_date_weighing") || "";
+
+    enableInputs();  // Re-disable them after reset
+    document.getElementById("assessment").disabled = true;
+    document.getElementById("school_year").disabled = true;
+    document.getElementById("date_weighing").disabled = true;
+    document.getElementById("actionButtons").style.display = "none";
+    document.getElementById("editContainer").style.display = "inline-block";
+  }
+</script>
+</body>
+</html>
+{% endblock %}

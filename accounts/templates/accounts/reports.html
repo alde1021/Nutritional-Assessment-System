@@ -1,0 +1,117 @@
+{% extends 'accounts/home.html' %}
+{% block content %}
+
+<h4>Nutritional Status Report</h4>
+
+<form method="get">
+  Grade Level:
+  <select name="grade_level" required>
+    <option value="">--Select Grade Level--</option>
+    {% for level in grade_levels %}
+      <option value="{{ level }}" {% if level == selected_grade %}selected{% endif %}>{{ level }}</option>
+    {% endfor %}
+  </select>
+
+  Section:
+  <select name="section" required>
+    <option value="">--Select Section--</option>
+    {% for sec in sections %}
+      <option value="{{ sec }}" {% if sec == selected_section %}selected{% endif %}>{{ sec }}</option>
+    {% endfor %}
+  </select>
+
+  Assessment Type:
+  <select name="assessment_type" required>
+    <option value="Baseline" {% if selected_assessment == "Baseline" %}selected{% endif %}>Baseline</option>
+    <option value="Terminal" {% if selected_assessment == "Terminal" %}selected{% endif %}>Terminal</option>
+  </select>
+
+  School Year:
+  <select name="school_year" required>
+    <option value="">--Select School Year--</option>
+    {% for sy in school_years %}
+      <option value="{{ sy }}" {% if sy == selected_sy %}selected{% endif %}>{{ sy }}</option>
+    {% endfor %}
+  </select>
+
+  <button type="submit" name="generate" value="1">Generate Report</button>
+
+  {% if students %}
+    <input type="hidden" name="grade_level" value="{{ selected_grade }}">
+    <input type="hidden" name="section" value="{{ selected_section }}">
+    <input type="hidden" name="assessment_type" value="{{ selected_assessment }}">
+    <input type="hidden" name="school_year" value="{{ selected_sy }}">
+    <button type="submit" name="export" value="1">Export to Excel</button>
+  {% endif %}
+</form>
+
+<br>
+
+{% if students %}
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Full Name</th>
+      <th>Birthday</th>
+      <th>Weight (kg)</th>
+      <th>Height (m)</th>
+      <th>Sex</th>
+      <th>Height²</th>
+      <th>Age (y,m)</th>
+      <th>BMI</th>
+      <th>Nutritional Status</th>
+      <th>Height-for-Age</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for student in students %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ student.last }}, {{ student.first }} {{ student.middle }}</td>
+      <td>{{ student.birthday|date:"m/d/Y" }}</td>
+      <td>{{ student.weight }}</td>
+      <td>{{ student.height }}</td>
+      <td>{{ student.gender }}</td>
+      <td>{{ student.height|floatformat:2|add:""|floatformat:2 }}</td>
+      <td>{{ student.age }}</td>
+      <td>{{ student.bmi|floatformat:2 }}</td>
+      <td>{{ student.nutritional_status }}</td>
+      <td>{{ student.height_for_age }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h5>Nutritional Status Summary</h5>
+<table class="table table-bordered table-sm" style="width: 300px;">
+  <thead><tr><th>Status</th><th>Count</th></tr></thead>
+  <tbody>
+    {% for status, count in nutrition_counts.items %}
+      <tr>
+        <td>{{ status }}</td>
+        <td>{{ count }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="2">No data available</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h5>Height-for-Age Summary</h5>
+<table class="table table-bordered table-sm" style="width: 300px;">
+  <thead><tr><th>Classification</th><th>Count</th></tr></thead>
+  <tbody>
+    {% for height, count in height_counts.items %}
+      <tr>
+        <td>{{ height }}</td>
+        <td>{{ count }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="2">No data available</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% endblock %}

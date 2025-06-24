@@ -1,0 +1,71 @@
+{% extends 'accounts/home.html' %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="form-container shadow-sm p-4 bg-white rounded">
+    <h4 class="mb-4">Schedule of Assessment</h4>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Button to open modal -->
+    <div class="mb-3 text-end">
+      <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#scheduleListModal">
+        View Schedule List
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Assessment Schedule List -->
+<div class="modal fade" id="scheduleListModal" tabindex="-1" aria-labelledby="scheduleListModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Assessment Schedule List</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th>Assessment Type</th>
+              <th>School Year</th>
+              <th>Principal</th>
+              <th>School</th>
+              <th>Address</th>
+              <th>City</th>
+              <th>Zip</th>
+              <th>Phone</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for schedule in schedules %}
+              <tr>
+                <td>{{ schedule.assessment_type }}</td>
+                <td>{{ schedule.school_year }}</td>
+                <td>{{ schedule.principal_name }}</td>
+                <td>{{ schedule.school_name }}</td>
+                <td>{{ schedule.school_address }}</td>
+                <td>{{ schedule.city }}</td>
+                <td>{{ schedule.zip_code }}</td>
+                <td>{{ schedule.phone_number }}</td>
+                <td>{{ schedule.email }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="9" class="text-center text-muted">No records found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

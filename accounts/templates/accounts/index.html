@@ -1,0 +1,152 @@
+{% extends 'accounts/home.html' %}
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Student Information</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .list-container {
+            margin: 30px auto;
+            max-width: 95%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        table {
+            width: 100%;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+<div class="list-container">
+    <h1>Student Information</h1>
+    <table class="table table-bordered table-striped table-hover table-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ID Number</th>
+                <th>Last</th>
+                <th>First</th>
+                <th>Middle</th>
+                <th>Birthday</th>
+                <th>Weight (kg)</th>
+                <th>Height (m)</th>
+                <th>Height²</th>
+                <th>Gender</th>
+                <th>Age (y,m)</th>
+                <th>BMI</th>
+                <th>Nutritional Status</th>
+                <th>Height-For-Age</th>
+                <th>Grade</th>
+                <th>Section</th>
+                <th colspan="2">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for x in mem %}
+            <tr>
+                <td>{{ x.id_no }}</td>
+                <td>{{ x.last }}</td>
+                <td>{{ x.first }}</td>
+                <td>{{ x.middle }}</td>
+                <td>{{ x.birthday }}</td>
+                <td>{{ x.weight }}</td>
+                <td>{{ x.height }}</td>
+                <td>{{ x.height_squared }}</td>
+                <td>{{ x.gender }}</td>
+                <td>{{ x.age_years_months }}</td>
+                <td>{{ x.bmi }}</td>
+                <td>{{ x.nutritional_status }}</td>
+                <td>{{ x.height_for_age }}</td>
+                <td>{{ x.user.grade_level }}</td>
+                <td>{{ x.user.section }}</td>
+                <td>
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#updateStudentModal{{ x.id_no }}">
+                        Update
+                    </button>
+                </td>
+                <td>
+                    <a href="{% url 'delete' x.id_no %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+
+            <!-- Update Modal for this student -->
+            <div class="modal fade" id="updateStudentModal{{ x.id_no }}" tabindex="-1" aria-labelledby="updateStudentModalLabel{{ x.id_no }}" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <form method="POST" action="{% url 'update' x.id_no %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="updateStudentModalLabel{{ x.id_no }}">Update Student Information</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="mb-2">
+                        <label>First Name</label>
+                        <input type="text" name="first" class="form-control" value="{{ x.first }}">
+                      </div>
+                      <div class="mb-2">
+                        <label>Last Name</label>
+                        <input type="text" name="last" class="form-control" value="{{ x.last }}">
+                      </div>
+                      <div class="mb-2">
+                        <label>Middle Name</label>
+                        <input type="text" name="middle" class="form-control" value="{{ x.middle }}">
+                      </div>
+                      <div class="mb-2">
+                        <label>Birthday</label>
+                        <input type="date" name="birthday" class="form-control" value="{{ x.birthday|date:'Y-m-d' }}">
+                      </div>
+                      <div class="mb-2">
+                        <label>Weight (kg)</label>
+                        <input type="number" step="0.1" name="weight" class="form-control" value="{{ x.weight }}">
+                      </div>
+                      <div class="mb-2">
+                        <label>Height (m)</label>
+                        <input type="number" step="0.01" name="height" class="form-control" value="{{ x.height }}">
+                      </div>
+                      <div class="mb-2">
+                        <label>Gender</label>
+                        <select name="gender" class="form-control">
+                            <option value="Male" {% if x.gender == "Male" %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if x.gender == "Female" %}selected{% endif %}>Female</option>
+                        </select>
+                      </div>
+                      <!-- Add more fields if needed -->
+                    </div>
+                    <div class="modal-footer">
+                      <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+{% endblock %}
