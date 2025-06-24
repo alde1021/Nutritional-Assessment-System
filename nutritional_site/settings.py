@@ -18,7 +18,7 @@ SECRET_KEY = 'django-insecure-xh)q1l^2z*3b&f#y)ky%84h&5)56)bes-_9-zc%i%o&tr)ot2r
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://nutritional.onrender.com', 'localhost', '127.0.0.1']  # Use ['*'] for local testing on different devices
+ALLOWED_HOSTS = ['nutritional.onrender.com', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
